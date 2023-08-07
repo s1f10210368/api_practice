@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-const apiKey = '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'; // あなたの実際のAPIキーを設定してください
+const apiKey = 'APIKEY'; // あなたの実際のAPIキーを設定してください
 const inputData = {
   model: 'gpt-3.5-turbo',
   messages: [
-    { role: 'system', content: 'You are a helpful assistant.' },
-    { role: 'user', content: 'Tell me a joke.' },
+    { role: 'system', content: 'You are a helpful assistant.' }, //system->接し方
+    { role: 'user', content: 'Tell me a joke.' }, //自分
     { role: 'assistant', content: 'Sure! Why did the chicken cross the road?' },
     { role: 'user', content: "I don't know, why did the chicken cross the road?" }
   ]

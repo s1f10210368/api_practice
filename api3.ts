@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-const apiKey = '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'; // あなたの実際のAPIキーを設定してください
+const apiKey = 'APIKEY'; // あなたの実際のAPIキーを設定してください
 const inputData = {
   model: 'gpt-3.5-turbo',
   messages: [
