@@ -1,21 +1,36 @@
-const {TwitterApi} = require("twitter-api-v2");
+import { test, expect } from "@playwright/test";
+import { chromium } from "@playwright/test";
+import axios from 'axios';  //httpリクエストを行うための便利なライブラリ
+import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 
-const client = new TwitterApi({
-    appkey: "cdIx6h1nSEYZkYqBImhYnGlFp",
-    appSecret: "Uy1019vCw93RN35aDdIcqqeBl1uaPFgmDJIgOh8B5vgJwTdyZz",
-    accessToken: "1687042801551495168-5FeFV9cFKdhjTsODXOKNLk6SngQWS6",
-    accessSecret: "hVbEyOqstFPqMpm6t73yuMfNPzNUEO2bOblXBNJY40T4Y",
-})
+const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
 
-const rwClient = client.readwrite
+const configuration = new Configuration({
+    apiKey: "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",
+    // apiKey : "process.env.API_KEY",
+});
 
-const tweet = async () => {
-    try {
-        await rwClient.v1.tweet("Good morning")
-    } catch(e){
-        console.error(e)
-    }
-}
+const response = await axios.post(apiEndpoint, prompt, {
+    headers: {
+      Authorization: `Bearer ${configuration.apiKey}`,
+      'Content-Type': 'application/json',
+    },
+});
 
-tweet()
-
+const runTwitter = (async() =>{
+    const message = response.data.choices[0]?.message;
+    const browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://twitter.com/login');
+    await page.getByLabel('Phone, email, or username').click();
+    await page.getByLabel('Phone, email, or username').fill('ini5thji');
+    await page.getByLabel('Phone, email, or username').press('Enter');
+    await page.getByLabel('Password', { exact: true }).fill('iniad5thjissyuu');
+    await page.getByLabel('Password', { exact: true }).press('Enter');
+    await page.getByTestId('SideNav_NewTweet_Button').click();
+    await page.getByRole('textbox', { name: 'Tweet text' }).click();
+    await page.getByRole('textbox', { name: 'Tweet text' }).fill(message.content);
+    await page.getByTestId('tweetButton').click();
+    return message.content;
+});

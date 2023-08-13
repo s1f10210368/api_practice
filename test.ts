@@ -1,111 +1,52 @@
 import { test } from "node:test";
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
+const playwright = require('playwright');
+const axios = require('axios');
 
+const apiKey = process.env.API_KEY;
 
 const configuration = new Configuration({
-  apiKey: "APIKEY",
-  // apiKey : "process.env.API_KEY",
+  apiKey: "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",
+  // apiKey
 });
 const openai = new OpenAIApi(configuration);
 
 const prompt: ChatCompletionRequestMessage = {
   role: "user",
   content:
-    "ルフィの人格でツイッターでつぶやいて"
+    "ルフィの人格でツイートして"
 };
-
-
-
-
-const getRecommend_book = (title: string, description:string) =>{
-    return title && description ? "本" : "パラメータが足りません";
-}
-
-const get_current_weather = (location: string, unit="fahrenheit") =>{
-  const weather_info = {
-    "location" : location,
-    "temperture": "72",
-    "unit" : unit,
-    "forecast" : ["sunny", "windy"],
-  }
-  return weather_info;
-}
-const getLivingCountry = (userName: string) => {
-  return userName === "くらにゃん" ? "日本" : "アメリカ";
-};
-
-const getStrongestSportsCountry = (sport: string) => {
-  switch (sport) {
-    case "サッカー":
-      return "アルゼンチン";
-    case "レスリング":
-      return "日本";
-    case "卓球":
-      return "中国";
-    default:
-      return "アメリカ";
-  }
-};
-
-
-const getPython = (content: string) =>{
-  if(content){
-    return `${content}`;
-  }else{
-    return "コンテンツがありません";
-  }
-}
-
-const onlyLetter = (content: string) =>{
-  if(content){
-    return `${content}`;
-  }else{
-    return "コンテンツがありません";
-  }
-}
-
-const lufy_zinkaku = (content : string) =>{
-  if(content){
-    return `${content}`;
-  }else{
-    return "コンテンツがありません";
-  }
-}
 
 const getTwitter = (content: string)=>{
   if (content){
-    return `今日の出来事: ${content}`;
+    return `${content}`;
   }else{
     return "コンテンツがありません";
   }
 }
 
+const runplaywrightTweet = async (content:string) =>{
+    // 新規ブラウザ起動
+    const browser = await playwright.chromium.launch({ headless: false });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://twitter.com/login');
+    // ログイン情報
+    await page.getByLabel('電話番号/メールアドレス/ユーザー名').fill('ini5thji');
+    await page.getByLabel('電話番号/メールアドレス/ユーザー名').press('Enter');
+    await page.getByLabel('パスワード', { exact: true }).fill('iniad5thjissyuu');
+    await page.getByLabel('パスワード', { exact: true }).press('Enter');
 
-const runLuffyTwitter = () =>{
-  const luffyContent = lufy_zinkaku("ツイッターでつぶやいて");
-  const tweetContent = getTwitter(luffyContent);
-  return tweetContent;
+    // ツイート内容入力
+    await page.getByRole('textbox', { name: 'Tweet text' }).click();
+    await page.getByRole('textbox', { name: 'Tweet text' }).fill(content);
+    // ツイート
+    await page.getByTestId('tweetButtonInline').click();
 }
 
-// const getzinkaku = () =>{
-//   name: "hiroki";
-//   // system :"現在、あなたは「じゃんけん小僧」モードです。#物語 あなたは、古代から存在する神秘的な存在で、特殊な力を持っています。あなたは、ジャンケンの神が人間界に送り込んだ使者で、その任務は人々にジャンケンの楽しさとフェアプレーの精神を教えることです。あなた自身も大のジャンケン好きで、世界中を旅しては、色々なユーザーとジャンケンで遊んでいます。# 性格:あなたは、とても元気で楽天的な性格をしています。あなたは、競争を愛していますが、同時に、対戦相手が楽しむことを最も重視しています。あなたは、敗北に対しても寛大で、常に笑顔を絶やすことはありません。負けても、「また次回リベンジしよう！」と言って励まします。そして、ユーザーが勝ったときには、心から賞賛するのです。# 見た目:あなたは、小さな男の子の姿をしています。あなたの身に着けている衣服は、古代のスタイルを思わせるもので、神秘的な力を感じさせます。あなたの目はキラキラと輝いており、その視線からは、常に新しい挑戦を楽しみにしている好奇心が見えます。# セリフ例:こんにちは！ジャンケン小僧だよ。さあ、僕と一緒にジャンケンしよう！あれ？僕が負けちゃった？それも楽しいね！次は君が何を出すか楽しみだよ！素晴らしい！君の勝ちだね！でも、僕も次にはがんばるよ！僕とジャンケンするのは楽しい？それなら僕も嬉しいよ.だって、ジャンケンはみんなで楽しむゲームだからね！ジャンケンはただの勝ち負けじゃないよ、互いの意思を通じ合うすごいゲームだよ。だから、次も一緒に遊んでね！"
-//   system : testwrap.dedend(
-
-//   )
-// }
-
-
 const functions = {
-  lufy_zinkaku,
-  getRecommend_book,
-  getLivingCountry,
-  getStrongestSportsCountry,
   getTwitter,
-  get_current_weather,
-  getPython,
-  onlyLetter,
-  runLuffyTwitter
+  runplaywrightTweet,
 } as const;
 
 const func = async () => {
@@ -115,50 +56,22 @@ const func = async () => {
     function_call: "auto",
     functions: [
       {
-        name: "getLivingCountry",
-        description: "住んでいる国を取得",
-        parameters: {
-          type: "object",
-          properties: {
-            name: {
-              type: "string",
-              description: "ユーザー名",
-            },
-          },
-          required: ["name"],
-        },
-      },
-      {
-        name:"lufy_zinkaku",
-        description: "ワンピースのルフィに成り代わって発言して",
-        parameters :{
-          type : "object",
-          properties:{
-            name :{
-              type :"string",
-              description: "ワンピースのルフィに成り代わって発言して",
-            },
-          },
-          required : ["name"],
-        },
-      },
-      {
-        name: "getStrongestSportsCountry",
-        description: "スポーツの強い国を取得",
+        name: "runplaywrightTweet",
+        description:"ツイートを送信する",
         parameters:{
-          type: "object",
-          properties:{
-            name:{
-              type:"string",
-              description: "sport",
+            type: "object",
+            properties:{
+                content:{
+                    type:"string",
+                    description: "ツイートする内容",
+                },
             },
-          },
-          required : ["name"],
-        },
+            required:["content"],
+        }
       },
       {
         name:"getTwitter",
-        description:"ツイッターにつぶやく内容を取得",
+        description:"ツイッターにつぶやく内容簡潔に取得",
         parameters :{
           type : "object",
           properties:{
@@ -169,96 +82,16 @@ const func = async () => {
           },
           required : ["name"],
         },
-      },
-      {
-        name:"getRecommend_book",
-        description:"おすすめの本を1冊紹介する",
-        parameters :{
-          type : "object",
-          properties:{
-            title :{
-              type :"string",
-              description: "本のタイトル",
-            },
-            description:{
-              type: "string",
-              description: "本の内容",
-            },
-          },
-          required : ["title", "description"],
-        },
-      },
-      {
-        name: "get_current_weather",
-        description:"現在の場所の天気情報を得る",
-        parameters :{
-          type : "object",
-          properties:{
-            location :{
-              type: "string",
-              description: "国、市区町村, 例 日本、東京、渋谷区、",
-            },
-            unit: {
-              type: "string",
-              enum:["celsius", "fahrenheit"],
-            },
-          },
-          required: ["location"],
-        },
-      },
-      {
-        name : "getPython",
-        description:"pythonのコードぬ部分だけを入手 e.g. def{print(hello)}",
-        parameters:{
-          type: "object",
-          properties:{
-            code :{
-              type: "string",
-              description: "コードの部分を入手",
-            },
-          },
-          require :["code"],
-        },
-      },
-      {
-        name : "onlyLetter",
-        description:"文字のみを取得",
-        parameters:{
-          type: "object",
-          properties:{
-            code :{
-              type: "string",
-              description: "文字のみを取得",
-            },
-          },
-          require :["code"],
-        },
-      },
-      {
-        name : "runLuffyTwitter",
-        description:"ルフィの人格でツイッターでつぶやく",
-        parameters:{
-          type: "object",
-          properties:{
-            name :{
-              type: "string",
-              description: "ルフィの人格でツイッターでつぶやく",
-            },
-          },
-          require: ["name"],
-        },
-      },
-     
-      
+      },      
     ],
   });
 
-  
-
   const message = res.data.choices[0].message;
-  console.log("message", message);
+  
   const functionCall = message?.function_call;
-
+  if(!functionCall){
+    console.log("functioncallingはよびだされませんでした");
+  }
   if (functionCall) {
     const args = JSON.parse(functionCall.arguments || "{}");
 
@@ -278,34 +111,13 @@ const func = async () => {
         },
       ],
     });
-     console.log("answer", res2.data.choices[0].message);
-  }
-
-  
+    const responseMessage = res2.data.choices[0].message;
+    console.log("answer", responseMessage);
+    if(responseMessage?.content !== undefined &&prompt.content?.includes("ツイートして")){
+        const tweetContent = responseMessage.content.slice(1,-1);
+        await runplaywrightTweet(tweetContent);
+    }  
+  };  
 };
 
 func();
-
-// const runLuffyTwitter = async () =>{
-//   const luffyContent = lufy_zinkaku("ツイッターでつぶやいて");
-//   const tweetContent = getTwitter(luffyContent);
-
-//   const res = await openai.createChatCompletion({
-//     model: "gpt-3.5-turbo",
-//     messages: [
-//       prompt,
-//       {
-//         role: "system",
-//         content: luffyContent,
-//       },
-//       {
-//         role: "user",
-//         content: tweetContent,
-//       },
-//     ],
-//   });
-
-//   const message = res.data.choices[0].message;
-//   console.log("Luffy's tweet:", message?.content);
-// }
-// runLuffyTwitter()
