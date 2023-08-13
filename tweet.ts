@@ -6,7 +6,7 @@ import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
 
 const configuration = new Configuration({
-    apiKey: "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",
+    apiKey: "APIKEY",
     // apiKey : "process.env.API_KEY",
 });
 

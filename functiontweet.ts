@@ -3,7 +3,7 @@ const axios = require('axios');
 
 async function tweetGeneratedText() {
   const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-  const apiKey = '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'; // あなたの実際のAPIキーを設定してください
+  const apiKey = 'APIKEY'; // あなたの実際のAPIキーを設定してください
   const inputData = {
     model: 'gpt-3.5-turbo',
     messages: [

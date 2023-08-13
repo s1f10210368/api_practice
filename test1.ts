@@ -2,7 +2,7 @@ const playwright = require('playwright');
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai";
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: "APIKEY",
   // apiKey : "process.env.API_KEY",
 });
 const openai = new OpenAIApi(configuration);
