@@ -9,7 +9,7 @@ async function getChatCompletion(): Promise<any> {
       { role: 'system', content: 'You are a helpful assistant.' },
       { role: 'user', content: 'Who won the world series in 2020?' }
     ]
-  };
+};
 
   try {
     const response = await axios.post(apiEndpoint, inputData, {
