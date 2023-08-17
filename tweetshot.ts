@@ -14,7 +14,7 @@ const openai = new OpenAIApi(configuration);
 const prompt: ChatCompletionRequestMessage = {
   role: "user",
   content:
-    "ルフィの人格でツイートして"
+    "面白いことを20文字以内でツイートして"
 };
 
 const getTwitter = (content: string)=>{
@@ -26,23 +26,54 @@ const getTwitter = (content: string)=>{
 }
 
 const runplaywrightTweet = async (content:string) =>{
-    // 新規ブラウザ起動
-    const browser = await playwright.chromium.launch({ headless: false });
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    await page.goto('https://twitter.com/login');
-    // ログイン情報
-    await page.getByLabel('電話番号/メールアドレス/ユーザー名').fill('ini5thji');
-    await page.getByLabel('電話番号/メールアドレス/ユーザー名').press('Enter');
-    await page.getByLabel('パスワード', { exact: true }).fill('iniad5thjissyuu');
-    await page.getByLabel('パスワード', { exact: true }).press('Enter');
+  // 新規ブラウザ起動
+  const browser = await playwright.chromium.launch({ headless: false });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('https://twitter.com/login');
+  // ログイン情報
+  await page.getByLabel('電話番号/メールアドレス/ユーザー名').fill('ini5thji');
+  await page.getByLabel('電話番号/メールアドレス/ユーザー名').press('Enter');
+  await page.getByLabel('パスワード', { exact: true }).fill('iniad5thjissyuu');
+  await page.getByLabel('パスワード', { exact: true }).press('Enter');
 
-    // ツイート内容入力
-    await page.getByRole('textbox', { name: 'Tweet text' }).click();
-    await page.getByRole('textbox', { name: 'Tweet text' }).fill(content);
-    await page.screenshot({ path: 'screenshot.png' });
-    // ツイート
-    await page.getByTestId('tweetButtonInline').click();
+  // ページのサイズを取得
+  const pageDimensions = await page.evaluate(() => {
+    return {
+      width: document.documentElement.clientWidth,
+      height: document.documentElement.clientHeight
+    };
+  });
+
+  // スクリーンショットを取得して特定の領域を切り抜く
+  const screenshotPath = 'screenshot.png';
+  await page.screenshot({
+    path: screenshotPath,
+    clip: {
+      x: pageDimensions.width / 2,
+      y: pageDimensions.height / 2,
+      width: pageDimensions.width / 2,
+      height: pageDimensions.height / 2
+    }
+  });
+
+  // ツイート内容入力
+  const tweetTextbox = await page.getByRole('textbox', { name: 'Tweet text' });
+  await tweetTextbox.click();
+  await tweetTextbox.fill(content);
+
+  if(content.includes("#")){
+      await tweetTextbox.press('Escape')
+  }
+
+  //ここで写真を追加
+  await page.getByLabel('Add photos or video').click();
+  const file = await page.waitForSelector('input[type="file"]');
+  await file.setInputFiles('/Users/iniad/Documents/TS/api_practice/screenshot.png')
+
+  // ツイート
+  await page.getByTestId('tweetButtonInline').click();
+  await browser.close();
 }
 
 const functions = {
@@ -78,7 +109,7 @@ const func = async () => {
           properties:{
             name :{
               type :"string",
-              description: "今日やったことを１行程度で表す",
+              description: "ツイートする内容を１行程度で表す",
             },
           },
           required : ["name"],

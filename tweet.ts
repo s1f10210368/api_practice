@@ -4,7 +4,7 @@ import axios from 'axios';  //httpリクエストを行うための便利なラ�
 
 test('test', async () => {
   const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-  const apiKey = 'APIKEY'; // あなたの実際のAPIキーを設定してください
+  const apiKey = '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'; // あなたの実際のAPIキーを設定してください
   const inputData = {
     model: 'gpt-3.5-turbo',
     messages: [
@@ -33,5 +33,6 @@ test('test', async () => {
   await page.getByTestId('SideNav_NewTweet_Button').click();
   await page.getByRole('textbox', { name: 'Tweet text' }).click();
   await page.getByRole('textbox', { name: 'Tweet text' }).fill(message.content);
+  await page.screenshot({ path: 'screenshot.png' });
   await page.getByTestId('tweetButton').click();
 });
