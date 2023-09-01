@@ -6,7 +6,7 @@ const axios = require('axios');
 const apiKey = process.env.API_KEY;
 
 const configuration = new Configuration({
-  apiKey: "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",
+  apiKey: "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",
   // apiKey
 });
 const openai = new OpenAIApi(configuration);
@@ -46,7 +46,7 @@ const runplaywrightTweet = async (content:string) =>{
   });
 
   // スクリーンショットを取得して特定の領域を切り抜く
-  const screenshotPath = 'screenshot.png';
+  const screenshotPath = 'othello_turn.png';
   await page.screenshot({
     path: screenshotPath,
     clip: {
@@ -73,7 +73,6 @@ const runplaywrightTweet = async (content:string) =>{
 
   // ツイート
   await page.getByTestId('tweetButtonInline').click();
-  await browser.close();
 }
 
 const functions = {
