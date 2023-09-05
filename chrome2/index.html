@@ -6,118 +6,56 @@
   </head>
   <body>
     <div id="content">
-      <button id="start">Start</button>
-      <button id="stop">Stop</button>
-      <button id="GPT">GPT</button>
+      <button id="start">録音開始</button>
+      <button id="stop">録音終了</button>
+      <button id="GPT">GPT返答</button>
       <div id="result"></div>
+
     </div>
     <audio id="audioElement" controls></audio>
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.13.1/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad/dist/index.browser.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
-        let mediaRecorder;
-        let audioChunks = [];
-        const audioElement = document.getElementById("audioElement");
-        const apiKey = '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';
-        const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
-        startButton = document.getElementById("start");
-        stopButton = document.getElementById("stop");
-        gptButton = document.getElementById("GPT");
-        startButton.addEventListener("click", async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    const file = new Blob(audioChunks, { type: 'audio/wav' });
-                    const audioUrl = URL.createObjectURL(file);
-                    audioElement.src = audioUrl;
-                    callTranscriptions(file, (text) => {
-                        console.log(text);
-                        if (!text) return;
-                        document.getElementById("result").innerHTML = text;
-                    });
-                };
-
-                mediaRecorder.start();
-                startButton.disabled = true;
-                stopButton.disabled = false;
-            } catch (error) {
-                console.error("マイクへのアクセスを取得できませんでした: ", error);
-            }
-        });
-
-        stopButton.addEventListener("click", () => {
-            if (mediaRecorder && mediaRecorder.state !== "inactive") {
-                mediaRecorder.stop();
-                mediaRecorder.stream.getTracks().forEach(track => track.stop()); // ストリームを停止
-                mediaRecorder = null; // mediaRecorderオブジェクトを解放
-                audioChunks = []; // 音声チャンクをクリア
-                startButton.disabled = false;
-                stopButton.disabled = true;
-            }
-        });
-
-
-        const callTranscriptions = (file, callback) => {
-            const XHR = new XMLHttpRequest();
-            XHR.addEventListener("load", (event) => {
-            callback(JSON.parse(event.target.responseText).text);
-            });
-            XHR.addEventListener("error", (event) => {
-            alert("error");
-            });
-            XHR.open("POST", "https://api.openai.com/v1/audio/transcriptions");
-            //XHR.setRequestHeader("Content-Type", "multipart/form-data"); これを書いたらサーバーエラーになる
-            XHR.setRequestHeader("Authorization", `Bearer ${apiKey}`);
-
-            var formData = new FormData();
-            formData.append("model", "whisper-1");
-            formData.append("language", "ja");
-            formData.append("file", file);
-            XHR.send(formData);
-        };
-        
-        gptButton.addEventListener("click", async() => {
-            // テキストを取得
-            const text = document.getElementById("result").innerHTML;
-
-            // GPT-3.5にリクエストを送信
-            const inputData = {
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    { role: 'system', content: 'Hey there! I am a laid-back assistant, ready to chat and help you out.' },
-                    { role: 'user', content: text},
-                ]
-            };
-
-            await axios.post(apiEndpoint, inputData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                },
-            })
-            .then((response) => {
-                const message = response.data.choices[0]?.message;
-                if (message) {
-                    console.log('Response:', message.content); 
-                } else {
-                    console.error('Error: Response message not found.');
-                }
-            })
-            .catch((error) => {
-            console.error('Error:');
-            });
-        });
-    
-
-    </script>
+    <script src="main.js"></script>
   </body>
+  <main>
+    <div style="margin-top: 10px;">
+        <label style="display: block;">Voice:</label>
+        <select id="voice"></select>
+    </div>
+    <div>
+        <label style="display: block; margin-top: 10px;">Pitch:</label>
+        <input
+                type="range"
+                class="pitch"
+                min="0"
+                max="2"
+                step="0.5"
+                value="1"
+        />
+    </div>
+    <div>
+        <label style="display: block;">Rate:</label>
+        <input
+                type="range"
+                class="rate"
+                min="0.5"
+                max="2"
+                value="1"
+                step="0.1"
+        />
+    </div>
+    <div>
+        <label style="display: block;">Volume:</label>
+        <input
+                type="range"
+                class="volume"
+                min="0"
+                max="1"
+                value="1"
+                step="0.1"
+        />
+    </div>
+    <div id="gptresult"></div>
+</main>
 </html>

@@ -1,0 +1,16 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+button {
+    font-size: 18px;
+    margin: 10px;
+}
+
+audio {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px;
+}
