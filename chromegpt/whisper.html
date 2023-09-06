@@ -13,26 +13,28 @@
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.13.1/dist/ort.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad/dist/index.browser.js"></script>
     <script>
-      let myvad;
+      let mediaRecorder;
+      let audioChunks = [];
+
       const startAudio = async (onRecorded) => {
         try {
-          if (!myvad) {
-            myvad = await vad.MicVAD.new({
-              onSpeechEnd: async (arr) => {
-                const wavBuffer = vad.utils.encodeWAV(arr);
-                var file = new File([wavBuffer], `audio.wav`);
-                document.getElementById("testAudio").src =
-                  URL.createObjectURL(file);
-                try {
-                  onRecorded(file);
-                } catch (err) {
-                  console.log(err);
-                }
-              },
-            });
-          }
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
 
-          myvad.start();
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioFile = new File([audioBlob], 'audio.wav');
+            onRecorded(audioFile);
+            audioChunks = []; // チャンクをリセット
+          };
+
+          mediaRecorder.start();
         } catch (e) {
           console.error("Failed:", e);
         }
@@ -52,7 +54,7 @@
         });
         XHR.open("POST", "https://api.openai.com/v1/audio/transcriptions");
         //XHR.setRequestHeader("Content-Type", "multipart/form-data"); これを書いたらサーバーエラーになる
-        XHR.setRequestHeader("Authorization", "Bearer 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");
+        XHR.setRequestHeader("Authorization", "Bearer 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");
 
         var formData = new FormData();
         formData.append("model", "whisper-1");
